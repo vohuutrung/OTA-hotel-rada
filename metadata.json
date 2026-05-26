@@ -1,0 +1,6 @@
+{
+  "name": "Hotel Price Radar",
+  "description": "Hệ thống quản lý doanh thu khách sạn thông minh với rada giá thị trường, phân khúc khách hàng, lịch sự kiện và robot AI pricing tự động.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
