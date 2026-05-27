@@ -48,18 +48,67 @@ export default function Header({
 
   const primaryColor = tenant.primaryColor;
 
+  const getOTADeepSearchUrl = (
+    otaKey: string,
+    hotel: string,
+    region: string,
+    cin: string,
+    cout: string
+  ): string => {
+    const query = `${hotel}, ${region}`;
+    const encodedQuery = encodeURIComponent(query);
+
+    switch (otaKey.toLowerCase()) {
+      case "booking":
+        return `https://www.booking.com/searchresults.html?ss=${encodedQuery}&checkin=${cin}&checkout=${cout}`;
+      case "expedia":
+        return `https://www.expedia.com/Hotel-Search?destination=${encodedQuery}&startDate=${cin}&endDate=${cout}`;
+      case "traveloka":
+        return `https://www.traveloka.com/en-vn/hotel/search?q=${encodedQuery}&checkIn=${cin}&checkOut=${cout}`;
+      case "trip":
+        return `https://www.trip.com/hotels/list?searchText=${encodedQuery}&fromcheckin=${cin}&fromcheckout=${cout}`;
+      case "agoda":
+      default:
+        return `https://www.agoda.com/search?q=${encodedQuery}&checkIn=${cin}&checkOut=${cout}`;
+    }
+  };
+
   const runCrawlerSimulation = () => {
+    // Generate deep search url pre-populated with form details (dates, hotel query, city)
+    const targetUrl = getOTADeepSearchUrl(ota, hotelName, city, checkin, checkout);
+    
+    try {
+      window.open(targetUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error("Failed to open OTA url", error);
+    }
+
     setIsCrawling(true);
     setCrawlProgress(10);
-    setCrawlLogs([`[INFO] Khởi tạo Playwright Headless Browser trên server local...`]);
+    setCrawlLogs([
+      `[INFO] Khởi tạo Playwright Headless Browser trên server local...`,
+      `[LAUNCH] Khởi chạy Chrome và mở liên kết tìm kiếm sâu (Deep Query Link)...`
+    ]);
     
     setTimeout(() => {
-      setCrawlLogs(prev => [...prev, `[INFO] Xoay vòng User-Agent ngẫu nhiên nhằm vượt rào bảo mật.`, `[INFO] Sử dụng proxy định vị IP tại ${city}...`]);
+      setCrawlLogs(prev => [
+        ...prev, 
+        `[INFO] Xoay vòng User-Agent ngẫu nhiên nhằm vượt rào bảo mật Cloudflare.`, 
+        `[INFO] Sử dụng proxy định vị IP tại ${city}...`
+      ]);
       setCrawlProgress(30);
     }, 600);
 
     setTimeout(() => {
-      setCrawlLogs(prev => [...prev, `[INFO] Mở trang chủ chính thức của OTA: ${ota.toUpperCase()}...`, `[INFO] Thực hiện điền form: Tìm kiếm "${hotelName}" tại khu vực "${city}"...`]);
+      setCrawlLogs(prev => [
+        ...prev, 
+        `[INFO] Tự động điền đầy đủ thông tin:`,
+        `      + Keyword: "${hotelName}"`,
+        `      + Địa điểm: "${city}"`,
+        `      + Check-in: ${checkin}`,
+        `      + Check-out: ${checkout}`,
+        `[INFO] Truy cập thành công liên kết điền sẵn kênh ${ota.toUpperCase()}...`
+      ]);
       setCrawlProgress(50);
     }, 1200);
 
